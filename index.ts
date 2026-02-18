@@ -64,6 +64,7 @@ async function deleteNote(lineNumber: number) {
 // Ambil input dari terminal: bun run index.ts "isi catatan"
 const command = Bun.argv[2]; 
 const value = Bun.argv[3];
+const extra = Bun.argv[4];
 
 
 if (command === "delete") {
@@ -78,6 +79,21 @@ if (command === "delete") {
     console.log("⚠️ Masukkan nomor baris. Contoh: bun run index.ts delete 1");
   }
 } 
+
+else if (command === "update") {
+  if (!value || !extra) {
+    console.log('⚠️ Contoh: bun run index.ts update 2 "isi baru"');
+  } else {
+    const num = parseInt(value);
+  if (isNaN(num)) {
+    console.log("❌ Nomor harus berupa angka");
+  } else {
+    await updateNote(num, extra);
+    await readNotes();
+    }
+  }
+}
+
 // TAMBAHKAN BAGIAN INI:
 else if (command === "list" || command === "view") {
   await readNotes();
@@ -87,9 +103,42 @@ else if (command) {
   await addNote(command);
   await readNotes(); // Tampilkan list setelah menambah
 } 
+// else {
+//   console.log("💡 Tips:");
+//   console.log("   Lihat Semua : bun run index.ts list");
+//   console.log("   Tambah      : bun run index.ts \"isi catatan\"");
+//   console.log("   Hapus       : bun run index.ts delete [nomor]");
+// }
+
 else {
-  console.log("💡 Tips:");
-  console.log("   Lihat Semua : bun run index.ts list");
-  console.log("   Tambah      : bun run index.ts \"isi catatan\"");
-  console.log("   Hapus       : bun run index.ts delete [nomor]");
+  console.log(`DAILY NOTES - CLI`);
+  console.log(`Perintah:`);
+  console.log(` Tambah : bun run index.ts "isi catatan"`);
+  console.log(` Lihat : bun run index.ts list`);
+  console.log(` Edit : bun run index.ts update [nomor] "isi baru"`);
+  console.log(` Hapus : bun run index.ts delete [nomor]`);
 }
+
+async function updateNote(number: number, newContent: string) {
+  const file = Bun.file(FILE_NAME);
+
+  if (!await file.exists()) {
+    console.log("Tidak ada file catatan");
+    return;
+  }
+
+  const content = await file.text();
+  const lines = content.trim().split("\n").filter(Boolean);
+
+  if (number < 1 || number > lines.length) {
+    console.log("❌ Nomor catatan tidak valid");
+    return;
+  }
+
+  const timestamp = new Date().toLocaleString();
+  lines[number - 1] = `[${timestamp}] ${newContent}`;
+
+  await Bun.write(FILE_NAME, lines.join("\n") + "\n");
+  console.log("✏️ Catatan berhasil diperbarui");
+}
+
