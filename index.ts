@@ -11,7 +11,7 @@ try {
     const existingContent = await file.exists() ? await file.text() : "";
     
     // Tambahkan catatan baru (dengan timestamp agar lebih keren)
-    const timestamp = new Date().toLocaleString();
+    const timestamp = new Date().toISOString();
     const formattedNote = `[${timestamp}] ${content}\n`;
     
     // Simpan kembali
@@ -135,7 +135,7 @@ async function updateNote(number: number, newContent: string) {
     return;
   }
 
-  const timestamp = new Date().toLocaleString();
+  const timestamp = new Date().toISOString();
   lines[number - 1] = `[${timestamp}] ${newContent}`;
 
   await Bun.write(FILE_NAME, lines.join("\n") + "\n");
