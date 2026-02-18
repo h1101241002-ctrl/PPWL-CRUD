@@ -93,6 +93,13 @@ else if (command === "update") {
     }
   }
 }
+else if (command === "search") {
+  if (value) {
+   await searchNote(value);
+  } else {
+    console.log("⚠️ Contoh: bun run index.ts search semangat");
+  }
+}
 
 // TAMBAHKAN BAGIAN INI:
 else if (command === "list" || command === "view") {
@@ -103,6 +110,7 @@ else if (command) {
   await addNote(command);
   await readNotes(); // Tampilkan list setelah menambah
 } 
+
 // else {
 //   console.log("💡 Tips:");
 //   console.log("   Lihat Semua : bun run index.ts list");
@@ -117,6 +125,7 @@ else {
   console.log(` Lihat : bun run index.ts list`);
   console.log(` Edit : bun run index.ts update [nomor] "isi baru"`);
   console.log(` Hapus : bun run index.ts delete [nomor]`);
+  console.log(` Cari  : bun run index.ts search [kata]`);
 }
 
 async function updateNote(number: number, newContent: string) {
@@ -142,3 +151,27 @@ async function updateNote(number: number, newContent: string) {
   console.log("✏️ Catatan berhasil diperbarui");
 }
 
+// FUNGSI SEARCH
+async function searchNote(keyword: string) {
+  const file = Bun.file(FILE_NAME);
+  if (!(await file.exists())) {
+    console.log("File tidak ditemyukan.");
+    return;
+  }
+
+  const content = await file.text();
+  const lines = content.trim().split("\n").filter(Boolean);
+  const result = lines.filter(line =>
+    line.toLowerCase().includes(keyword.toLowerCase())
+  );
+
+  if (result.length > 0) {
+    console.log(`\n Hasil pencarian untuk: "${keyword}"`);
+    result.forEach((line, index) => {
+      console.log(`${index + 1}. ${line}`);
+    });
+  
+  } else {
+    console.log(`\n "${keyword}." Tidak ditemukan`);
+  }
+}
